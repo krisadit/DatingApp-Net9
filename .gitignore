@@ -486,3 +486,5 @@ $RECYCLE.BIN/
 # Project-specific files
 API/appsettings.json
 .vscode/
+*.db-shm
+*.db-wal
