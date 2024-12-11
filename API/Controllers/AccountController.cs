@@ -45,7 +45,7 @@ namespace API.Controllers
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized("Invalid Username");
             }
 
             HMACSHA512 hmac = new()

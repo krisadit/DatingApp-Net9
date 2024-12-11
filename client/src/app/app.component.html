@@ -1,13 +1,6 @@
-<h1>{{title}}</h1>
-@if (errMsg.length != 0) {
-<p style="color: red;">{{errMsg}}</p>
-}
+<app-nav></app-nav>
 
-<ul>
-  @for (user of users; track $index) {
-  <li>
-    {{user.id}} | {{user.userName}}
-  </li>
-  }
-</ul>
+<main class="container my-5">
+  <app-home></app-home>
+</main>
 <router-outlet />
