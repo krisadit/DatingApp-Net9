@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { RegisterComponent } from "../register/register.component";
 import { AppUser } from '../_models/app-user';
 import { UsersService } from '../_services/users.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-home',
@@ -12,9 +13,10 @@ import { UsersService } from '../_services/users.service';
 })
 export class HomeComponent implements OnInit {
   registerMode = false;
-  errMsg = '';
 
   userService = inject(UsersService);
+  private toastr = inject(ToastrService);
+
   users: AppUser[] = [];
 
   ngOnInit(): void {
@@ -35,10 +37,7 @@ export class HomeComponent implements OnInit {
         (result) => {
           this.users = result;
         },
-      error: (err) => {
-        console.log(err);
-        this.errMsg = err;
-      },
+      error: err => this.toastr.error(err.error),
       complete: () => {
         console.log('Request complete');
       }
