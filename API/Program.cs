@@ -1,3 +1,4 @@
+using API.Errors;
 using API.Extensions;
 
 namespace DatingApp
@@ -13,7 +14,7 @@ namespace DatingApp
             builder.Services.AddIdentityServices(builder.Configuration);
 
             var app = builder.Build();
-
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseCors(policy =>
             {
                 policy.AllowAnyHeader();
