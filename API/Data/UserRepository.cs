@@ -23,7 +23,7 @@ namespace API.Data
                 .SingleOrDefaultAsync(user => user.Id == id);
         }
 
-        public async Task<AppUser?> GetByNameAsync(string username)
+        public async Task<AppUser?> GetByUsernameAsync(string username)
         {
             return await context.Users
                 .Include(x => x.Photos)

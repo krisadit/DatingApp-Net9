@@ -25,6 +25,10 @@
       @if (accountService.currentUser()) {
       <div class="dropdown" dropdown>
         <button class="btn btn-primary dropdown-toggle text-light text-decoration-none" dropdownToggle type="button">
+          <div class="profile-pic me-3">
+            <img src="{{accountService.currentUser()?.photoUrl || 'user.png'}}"
+              alt="{{accountService.currentUser()?.username}}'s profile picture" onerror="this.src='user.png'" />
+          </div>
           Welcome {{accountService.currentUser()?.username | titlecase}}!
         </button>
         <ul id="dropdown-animated" *dropdownMenu class="dropdown-menu" role="menu" aria-labelledby="button-animated">

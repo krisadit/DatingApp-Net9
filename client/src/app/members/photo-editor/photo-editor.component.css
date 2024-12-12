@@ -1,0 +1,5 @@
+.nv-file-over {
+  border: solid 1px var(--bs-info);
+  color: var(--bs-info);
+  transition: all 0.3s ease-in-out;
+}

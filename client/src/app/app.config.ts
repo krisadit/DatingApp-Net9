@@ -27,7 +27,8 @@ export const appConfig: ApplicationConfig = {
         thumbs: true,
         bullets: true,
         nav: true,
-        thumbPosition: 'left',
+        itemAutosize: true,
+        thumbPosition: 'bottom',
         imageSize: 'contain'
       } as GalleryConfig
     }

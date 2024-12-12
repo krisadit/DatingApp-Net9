@@ -13,7 +13,8 @@
   </div>
   <div class="col-4">
     <div class="card">
-      <img class="card-img img-thumbnail" src="{{member.photoUrl || 'user.png'}}" alt="{{member.knownAs}}" />
+      <img class="card-img img-thumbnail" src="{{member.photoUrl || 'user.png'}}" alt="{{member.knownAs}}"
+        onerror="this.src='user.png'" />
       <div class="card-body">
         <div>
           <strong>Location:</strong>
@@ -61,7 +62,7 @@
         </form>
       </tab>
       <tab heading="Photos" class="mt-2">
-        <p>Photo edit will go here</p>
+        <app-photo-editor [member]="member" (memberChange)="onMemberChange($event)"></app-photo-editor>
       </tab>
     </tabset>
   </div>
