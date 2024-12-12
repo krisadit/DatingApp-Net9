@@ -10,7 +10,7 @@ import { map } from 'rxjs';
 export class AccountService {
 
   private http = inject(HttpClient)
-  private baseUrl = `${environment.apiUrl}/`;
+  private baseUrl = environment.apiUrl;
   currentUser = signal<StoredUser | null>(null);
 
   login(model: any) {

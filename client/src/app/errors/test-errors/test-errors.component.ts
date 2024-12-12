@@ -10,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
   styleUrl: './test-errors.component.css'
 })
 export class TestErrorsComponent {
-  private baseUrl = `${environment.apiUrl}/`;
+  private baseUrl = environment.apiUrl;
   private http = inject(HttpClient);
   validationErrors: string[] = []
 
