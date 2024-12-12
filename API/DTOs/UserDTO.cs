@@ -5,11 +5,16 @@ namespace API.DTOs
     public class UserDTO
     {
         [Required]
-        public string Username { get; set; } = string.Empty;
+        public required string Username { get; set; }
 
         [Required]
-        public string Token { get; set; } = string.Empty;
+        public required string Token { get; set; }
+
+        [Required]
+        public required string KnownAs { get; set; }
 
         public string? PhotoUrl { get; set; }
+
+        
     }
 }
