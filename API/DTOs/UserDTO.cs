@@ -15,6 +15,6 @@ namespace API.DTOs
 
         public string? PhotoUrl { get; set; }
 
-        
+        public required string Gender { get; set; }
     }
 }

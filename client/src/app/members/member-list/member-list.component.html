@@ -1,7 +1,69 @@
-<div class="row">
-  @for (member of membersService.members(); track member.id) {
+<div class="d-flex justify-content-center row">
+  <div class="text-center mt-3">
+    <h2>
+      Your Matches -
+      {{ membersService.paginatedResults()?.pagination?.totalItems }}
+    </h2>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <form class="col-12" #form="ngForm" (ngSubmit)="loadMembers()">
+        <div class="row mx-4 my-3">
+          <label class="col col-form-label col-form-label-sm" for="minAge">
+            <i class="fa fa-filter me-2"></i>Age from:</label>
+          <input type="number" class="col form-control form-control-sm mx-1" id="minAge" name="minAge"
+            [(ngModel)]="membersService.userParams().minAge" />
+
+          <label class="col col-form-label col-form-label-sm" for="maxAge">Age from:</label>
+          <input type="number" class="col form-control form-control-sm mx-1" id="maxAge" name="maxAge"
+            [(ngModel)]="membersService.userParams().maxAge" />
+
+          <label class="col col-form-label col-form-label-sm" for="gender">Show:</label>
+          <select name="gender" id="gender" class="col form-select form-select-sm mx-1"
+            [(ngModel)]="membersService.userParams().gender">
+            @for (gender of genderList; track gender.value) {
+            <option [value]="gender.value">
+              {{ gender.display }}
+            </option>
+            }
+          </select>
+          <button class="btn btn-primary btn-sm ms-1 col" type="submit">
+            <i class="fa fa-check"></i>
+          </button>
+          <button class="btn btn-info btn-sm ms-1 col" type="button" (click)="resetFilters()">
+            <i class="fa fa-refresh"></i>
+          </button>
+        </div>
+        <div class="row mx-4 my-3">
+          <label class="float-start col col-form-label col-form-label-sm" for="orderBy"><i
+              class="fa fa-sort float-end"></i> Sort
+            by:</label>
+          <select name="orderBy" id="orderBy" class="col form-select form-select-sm mx-1"
+            [(ngModel)]="membersService.userParams().orderBy" (change)="loadMembers()">
+            @for (so of sortList; track so.value) {
+            <option [value]="so.value">
+              {{ so.display }}
+            </option>
+            }
+          </select>
+        </div>
+      </form>
+    </div>
+  </div>
+  @for (member of membersService.paginatedResults()?.items; track member.id) {
   <div class="col-2">
     <app-member-card [member]="member"></app-member-card>
   </div>
   }
 </div>
+
+@if (membersService.paginatedResults()?.pagination) {
+<div class="d-flex justify-content-center">
+  <pagination [boundaryLinks]="true" [totalItems]="(membersService.paginatedResults()?.pagination)!.totalItems"
+    [itemsPerPage]="(membersService.paginatedResults()?.pagination)!.itemsPerPage" (pageChanged)="pageChanged($event)"
+    [(ngModel)]="membersService.paginatedResults()?.pagination!.currentPage" [maxSize]="10" previousText="&lsaquo;"
+    nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;">
+  </pagination>
+</div>
+}

@@ -29,7 +29,7 @@
             <img src="{{accountService.currentUser()?.photoUrl || 'user.png'}}"
               alt="{{accountService.currentUser()?.username}}'s profile picture" onerror="this.src='user.png'" />
           </div>
-          Welcome {{accountService.currentUser()?.username | titlecase}}!
+          Welcome {{accountService.currentUser()?.knownAs}}!
         </button>
         <ul id="dropdown-animated" *dropdownMenu class="dropdown-menu" role="menu" aria-labelledby="button-animated">
           <li role="menuitem"><a class="dropdown-item" routerLink="/member/edit">Edit profile</a></li>

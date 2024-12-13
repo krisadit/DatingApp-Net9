@@ -20,7 +20,8 @@ namespace API.Services
             SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(tokenKey));
 
             List<Claim> claims = [
-                new(ClaimTypes.NameIdentifier, user.UserName)
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Name, user.UserName),
             ];
 
             SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha512Signature);
