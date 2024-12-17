@@ -9,9 +9,9 @@
     <div class="row my-3">
       <div class="col-1">
         <label class="col-form-label col-form-label-sm float-end">
-          <i class="fa fa-filter"></i></label>
+          <i class="fa fa-filter fa-lg"></i></label>
       </div>
-      <div class="col-4 btn-group" btnRadioGroup [(ngModel)]="predicate" aria-label="Filters" (click)="loadLikes()">
+      <div class="col-6 btn-group" btnRadioGroup [(ngModel)]="predicate" aria-label="Filters" (click)="loadLikes()">
         <label class="btn btn-outline-primary" btnRadio="liked">My Likes</label>
         <label class="btn btn-outline-primary" btnRadio="mutual">Matches</label>
         <label class="btn btn-outline-primary" btnRadio="likedBy">Likes me</label>
@@ -26,7 +26,7 @@
     </div>
   </div>
 
-  @if (likesService.paginatedResults()?.pagination) {
+  @if (likesService.paginatedResults()?.pagination && likesService.paginatedResults()?.pagination?.totalItems! > 0) {
   <div class="d-flex justify-content-center">
     <pagination [boundaryLinks]="true" [totalItems]="(likesService.paginatedResults()?.pagination)!.totalItems"
       [itemsPerPage]="(likesService.paginatedResults()?.pagination)!.itemsPerPage" (pageChanged)="pageChanged($event)"

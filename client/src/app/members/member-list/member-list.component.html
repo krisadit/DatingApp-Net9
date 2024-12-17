@@ -11,7 +11,7 @@
       <form class="col-12" #form="ngForm" (ngSubmit)="loadMembers()">
         <div class="row mx-4 my-3">
           <label class="col col-form-label col-form-label-sm" for="minAge">
-            <i class="fa fa-filter me-2"></i>Age from:</label>
+            <i class="fa fa-filter fa-lg me-2"></i>Age from:</label>
           <input type="number" class="col form-control form-control-sm mx-1" id="minAge" name="minAge"
             [(ngModel)]="membersService.userParams().minAge" />
 
@@ -58,7 +58,7 @@
   }
 </div>
 
-@if (membersService.paginatedResults()?.pagination) {
+@if (membersService.paginatedResults()?.pagination && membersService.paginatedResults()?.pagination?.totalItems! > 0) {
 <div class="d-flex justify-content-center">
   <pagination [boundaryLinks]="true" [totalItems]="(membersService.paginatedResults()?.pagination)!.totalItems"
     [itemsPerPage]="(membersService.paginatedResults()?.pagination)!.itemsPerPage" (pageChanged)="pageChanged($event)"
