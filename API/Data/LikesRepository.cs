@@ -1,5 +1,6 @@
 ﻿using API.DTOs;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -32,27 +33,32 @@ namespace API.Data
             return await context.Likes.FindAsync(sourceUserId, targetUserId);
         }
 
-        public async Task<IEnumerable<MemberDTO>> GetUserLikes(string predicates, int userId)
+        public async Task<PagedList<MemberDTO>> GetUserLikes(LikesParams likesParams)
         {
             var likes = context.Likes.AsQueryable();
+            IQueryable<MemberDTO> query;
 
-            switch (predicates)
+            switch (likesParams.Predicate)
             {
                 case "liked":
-                    return await likes.Where(x => x.SourceUserId == userId)
-                        .Select(x => x.TargetUser).ProjectTo<MemberDTO>(mapper.ConfigurationProvider).ToListAsync();
+                    query = likes.Where(x => x.SourceUserId == likesParams.UserId)
+                        .Select(x => x.TargetUser).ProjectTo<MemberDTO>(mapper.ConfigurationProvider);
+                    break;
                 case "likedBy":
-                    return await likes.Where(x => x.TargetUserId == userId)
-                        .Select(x => x.SourceUser).ProjectTo<MemberDTO>(mapper.ConfigurationProvider).ToListAsync();
+                    query = likes.Where(x => x.TargetUserId == likesParams.UserId)
+                        .Select(x => x.SourceUser).ProjectTo<MemberDTO>(mapper.ConfigurationProvider);
+                    break;
                 default:
+                    var likeIds = await GetCurrentUserLikeIds(likesParams.UserId);
+                    query = likes
+                        .Where(x => x.TargetUserId == likesParams.UserId && likeIds.Contains(x.SourceUserId))
+                        .Select(x => x.SourceUser)
+                        .ProjectTo<MemberDTO> (mapper.ConfigurationProvider);
                     break;
             }
 
-            var likeIds = await GetCurrentUserLikeIds(userId);
-            return await likes
-                .Where(x => x.TargetUserId == userId && likeIds.Contains(x.SourceUserId))
-                .Select(x => x.SourceUser)
-                .ProjectTo<MemberDTO> (mapper.ConfigurationProvider).ToListAsync();
+
+            return await PagedList<MemberDTO>.CreateAsync(query, likesParams.PageNumber, likesParams.PageSize);
         }
 
 
