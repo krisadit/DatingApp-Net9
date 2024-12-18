@@ -2,6 +2,7 @@ using API.Data;
 using API.Entities;
 using API.Errors;
 using API.Extensions;
+using API.SignalR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,14 +22,18 @@ namespace DatingApp
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseCors(policy =>
             {
-                policy.AllowAnyHeader();
-                policy.AllowAnyMethod();
-                policy.WithOrigins("http://localhost:4200", "https://localhost:4200");
+                policy.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .WithOrigins("http://localhost:4200", "https://localhost:4200");
             });
 
             app.UseAuthentication();
             app.UseAuthorization();
+
             app.MapControllers();
+            app.MapHub<PresenceHub>("hubs/presence");
+            app.MapHub<MessageHub>("hubs/message");
 
             // We need to access a service locator to get ahold of a service outside of
             // dependency injection so that it can be disposed of immediately.

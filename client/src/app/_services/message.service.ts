@@ -1,8 +1,10 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { PaginatedResult } from '../_models/pagination';
+import { inject, Injectable, signal } from '@angular/core';
+import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { environment } from '../../environments/environment';
 import { Message } from '../_models/message';
+import { PaginatedResult } from '../_models/pagination';
+import { StoredUser } from '../_models/stored-user';
 import { setPaginatedResponse, setPaginationHeaders } from './pagination-helper';
 
 @Injectable({
@@ -10,8 +12,36 @@ import { setPaginatedResponse, setPaginationHeaders } from './pagination-helper'
 })
 export class MessageService {
   private baseUrl = environment.apiUrl;
+  private hubsUrl = environment.hubsUrl;
   private http = inject(HttpClient);
+  private hubConnection?: HubConnection;
   paginatedResults = signal<PaginatedResult<Message[]> | null>(null);
+  messageThread = signal<Message[]>([]);
+
+  createHubConnection(user: StoredUser, otherUsername: string) {
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl(`${this.hubsUrl}message?user=${otherUsername}`, {
+        accessTokenFactory: () => user.token
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    this.hubConnection.start().catch(error => console.log(error));
+
+    this.hubConnection.on('ReceiveMessageThread', messages => {
+      this.messageThread.set(messages);
+    });
+
+    this.hubConnection.on('NewMessage', message => {
+      this.messageThread.update(messages => [...messages, message])
+    });
+  }
+
+  stopHubConnection() {
+    if (this.hubConnection?.state === HubConnectionState.Connected) {
+      this.hubConnection.stop().catch(error => console.log(error));
+    }
+  }
 
   getMessages(pageNumber: number, pageSize: number, container: string) {
     let params = setPaginationHeaders(pageNumber, pageSize);
@@ -28,7 +58,7 @@ export class MessageService {
   }
 
   sendMessage(username: string, content: string) {
-    return this.http.post<Message>(`${this.baseUrl}messages`, { recipientUsername: username, content })
+    return this.hubConnection?.invoke('SendMessage', { RecipientUserName: username, Content: content });
   }
 
   deleteMessage(id: number) {
