@@ -11,6 +11,9 @@ namespace API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Disable foreign key constraints temporarily, specific to SQLite
+            migrationBuilder.Sql("PRAGMA foreign_keys = 0;", suppressTransaction: true);
+
             migrationBuilder.DropForeignKey(
                 name: "FK_Likes_Users_SourceUserId",
                 table: "Likes");
@@ -342,11 +345,15 @@ namespace API.Data.Migrations
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
+
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Re-enable foreign key constraints, specific to SQLite
+            migrationBuilder.Sql("PRAGMA foreign_keys = 1;", suppressTransaction: true);
+
             migrationBuilder.DropForeignKey(
                 name: "FK_Likes_AspNetUsers_SourceUserId",
                 table: "Likes");
