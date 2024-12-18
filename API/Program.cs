@@ -45,6 +45,8 @@ namespace DatingApp
                 var userManager = services.GetRequiredService<UserManager<AppUser>>();
                 var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
                 await context.Database.MigrateAsync();
+                await context.Database.ExecuteSqlRawAsync("DELETE FROM [Connections]"); // SQLite/SQLServer specific command
+                // await context.Database.ExecuteSqlRawAsync("DELETE FROM \"Groups\""); // PostgreSQL example
                 await Seed.SeedUsers(userManager, roleManager);
             }
             catch (Exception ex)

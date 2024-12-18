@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR
 {
-    public class MessageHub(IMessageRepository messageRepository, IUserRepository userRepository, IMapper mapper) : Hub
+    public class MessageHub(IMessageRepository messageRepository, IUserRepository userRepository, IMapper mapper, IHubContext<PresenceHub> presenceHubContext) : Hub
     {
         public override async Task OnConnectedAsync()
         {
@@ -22,15 +22,17 @@ namespace API.SignalR
 
             var groupName = getGroupName(Context.User.GetUsername(), otherUser);
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            await AddToGroup(groupName);
 
             var messages = await messageRepository.GetMessageThread(Context.User.GetUsername(), otherUser!);
 
             await Clients.Group(groupName).SendAsync("ReceiveMessageThread", messages);
         }
 
-        public override Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            return base.OnDisconnectedAsync(exception);
+            await RemoveFromMessageGroup();
+            await base.OnDisconnectedAsync(exception);
         }
 
         public async Task SendMessage(CreateMessageDTO createMessageDTO)
@@ -59,13 +61,62 @@ namespace API.SignalR
                 Content = createMessageDTO.Content
             };
 
+            var groupName = getGroupName(sender.UserName, recipient.UserName);
+
+            var group = await messageRepository.GetMessageGroup(groupName);
+
+            if (group != null && group.Connections.Any(x => x.Username == recipient.UserName))
+            {
+                message.DateRead = DateTime.UtcNow;
+            }
+            else
+            {
+                var connections = await PresenceTracker.GetConnectionsForUser(recipient.UserName);
+                if (connections != null && connections.Count != 0)
+                {
+                    await presenceHubContext.Clients.Clients(connections).SendAsync("NewMessageReceived", new
+                    {
+                        username = sender.UserName,
+                        knownAs = sender.KnownAs
+                    });
+                }
+            }
+
+
             messageRepository.AddMessage(message);
 
             if (await messageRepository.SaveAllAsync())
             {
-                var group = getGroupName(sender.UserName, recipient.UserName);
+                await Clients.Group(groupName).SendAsync("NewMessage", (mapper.Map<MessageDTO>(message)));
+            }
+        }
 
-                await Clients.Group(group).SendAsync("NewMessage", (mapper.Map<MessageDTO>(message)));
+        private async Task<bool> AddToGroup(string groupName)
+        {
+            var username = Context.User?.GetUsername() ?? throw new Exception("Could not get user");
+
+            Group? group = await messageRepository.GetMessageGroup(groupName);
+            Connection connection = new() { ConnectionId = Context.ConnectionId, Username = username };
+
+            if (group == null)
+            {
+                group = new() { Name = groupName };
+                messageRepository.AddGroup(group);
+            }
+
+            group.Connections.Add(connection);
+
+            return await messageRepository.SaveAllAsync();
+        }
+
+        private async Task RemoveFromMessageGroup()
+        {
+            var connection = await messageRepository.GetConnection(Context.ConnectionId);
+
+            if (connection != null)
+            {
+                messageRepository.RemoveConnection(connection);
+                await messageRepository.SaveAllAsync();
             }
         }
 
