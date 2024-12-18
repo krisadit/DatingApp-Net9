@@ -1,4 +1,5 @@
 ﻿using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,9 +9,9 @@ namespace API.Data
 {
     public class Seed // Temporary database seeder for test data
     {
-        public static async Task SeedUsers(DataContext context)
+        public static async Task SeedUsers(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
         {
-            if (await context.Users.AnyAsync())
+            if (await userManager.Users.AnyAsync())
             {
                 return;
             }
@@ -27,17 +28,36 @@ namespace API.Data
             {
                 return;
             }
-            foreach (var user in users)
-            {
-                using HMACSHA512 hmac = new();
 
-                user.UserName = user.UserName.ToLower();
-                user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes("Pa$$w0rd"));
-                user.PassswordSalt = hmac.Key;
-                context.Users.Add(user);
+            List<AppRole> roles = [
+                new AppRole() { Name = "Member"},
+                new AppRole() { Name = "Admin" },
+                new AppRole() { Name = "Moderator" },
+            ];
+
+            foreach (AppRole role in roles)
+            {
+                await roleManager.CreateAsync(role);
             }
 
-            await context.SaveChangesAsync();
+            foreach (var user in users)
+            {
+                user.UserName = user.UserName!.ToLower();
+                await userManager.CreateAsync(user, "Pa$$w0rd"); // Probably needs to be randomized everytime?
+                await userManager.AddToRoleAsync(user, "Member");
+            }
+
+            AppUser admin = new()
+            {
+                UserName = "admin",
+                KnownAs = "Admin",
+                Gender = "",
+                City = "",
+                Country = ""
+            };
+
+            await userManager.CreateAsync(admin, "Pa$$w0rd");
+            await userManager.AddToRolesAsync(admin, ["Admin", "Moderator"]);
         }
     }
 }
