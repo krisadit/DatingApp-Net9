@@ -12,7 +12,8 @@ namespace API.Extensions
         public static IServiceCollection AddIdentityServices(this IServiceCollection services,
             IConfiguration config)
         {
-            services.AddIdentityCore<AppUser>(opt => {
+            services.AddIdentityCore<AppUser>(opt =>
+            {
                 opt.Password.RequireNonAlphanumeric = false;
                 //opt.User.RequireUniqueEmail = true; for example
             }).AddRoles<AppRole>()
@@ -32,6 +33,10 @@ namespace API.Extensions
                         ValidateAudience = false
                     };
                 });
+
+            services.AddAuthorizationBuilder()
+                .AddPolicy("RequiredAdminRole", policy => policy.RequireRole("Admin"))
+                .AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin", "Moderator"));
 
             return services;
         }

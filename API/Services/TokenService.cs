@@ -1,5 +1,6 @@
 ﻿using API.Entities;
 using API.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -7,9 +8,9 @@ using System.Text;
 
 namespace API.Services
 {
-    public class TokenService(IConfiguration config) : ITokenService
+    public class TokenService(IConfiguration config, UserManager<AppUser> userManager) : ITokenService
     {
-        public string CreateToken(AppUser user)
+        public async Task<string> CreateToken(AppUser user)
         {
             string tokenKey = config["TokenKey"] ?? throw new Exception("TokenKey not found in App settings");
             if (tokenKey.Length < 64)
@@ -29,9 +30,14 @@ namespace API.Services
                 new(ClaimTypes.Name, user.UserName),
             ];
 
+            var roles = await userManager.GetRolesAsync(user);
+
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
             SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha512Signature);
 
-            SecurityTokenDescriptor descriptor = new() {
+            SecurityTokenDescriptor descriptor = new()
+            {
                 Subject = new(claims),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = creds
