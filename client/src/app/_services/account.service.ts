@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { StoredUser } from '../_models/stored-user';
 import { map } from 'rxjs';
@@ -14,6 +14,16 @@ export class AccountService {
   private likesService = inject(LikesService);
   private baseUrl = environment.apiUrl;
   currentUser = signal<StoredUser | null>(null);
+  roles = computed(() => {
+    const user = this.currentUser();
+
+    if (user && user.token) {
+      const role = JSON.parse(atob(user.token.split('.')[1])).role;
+      return Array.isArray(role) ? role : [role];
+    }
+
+    return [];
+  })
 
   login(model: any) {
     return this.http.post<StoredUser>(`${this.baseUrl}account/login`, model).pipe(
