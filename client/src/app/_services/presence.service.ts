@@ -24,8 +24,8 @@ export class PresenceService {
       .withAutomaticReconnect()
       .build();
     this.hubConnection.start().catch(error => console.log(error));
-    this.hubConnection.on('UserIsOnline', username => this.toastr.info(`${username} is online!`));
-    this.hubConnection.on('UserIsOffline', username => this.toastr.info(`${username} has left the building.`));
+    this.hubConnection.on('UserIsOnline', username => this.onlineUsers.update(users => [...users, username]));
+    this.hubConnection.on('UserIsOffline', username => this.onlineUsers.update(users => users.filter(x => x != username)));
     this.hubConnection.on('GetOnlineUsers', usernames => this.onlineUsers.set(usernames));
     this.hubConnection.on('NewMessageReceived', ({ username, knownAs }) => {
       this.toastr.info(`New message from ${knownAs}! Click me to open`)

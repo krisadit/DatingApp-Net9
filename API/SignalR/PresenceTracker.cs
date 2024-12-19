@@ -4,8 +4,9 @@
     {
         private static readonly Dictionary<string, List<string>> OnlineUsers = []; // not scalable, not thread safe, use Redis or something else.
 
-        public Task UserConnected(string username, string connectionId)
+        public Task<bool> UserConnected(string username, string connectionId)
         {
+            var isOnline = false;
             lock (OnlineUsers)
             {
                 if (OnlineUsers.ContainsKey(username))
@@ -15,19 +16,21 @@
                 else
                 {
                     OnlineUsers.Add(username, [connectionId]);
+                    isOnline = true;
                 }    
             }
 
-            return Task.CompletedTask;
+            return Task.FromResult(isOnline);
         }
 
-        public Task UserDisconnected(string username, string connectionId)
+        public Task<bool> UserDisconnected(string username, string connectionId)
         {
+            var isOffline = false;
             lock (OnlineUsers)
             {
                 if (!OnlineUsers.ContainsKey(username))
                 {
-                    return Task.CompletedTask;
+                    return Task.FromResult(isOffline);
                 }
 
                 OnlineUsers[username].Remove(connectionId);
@@ -35,10 +38,11 @@
                 if (OnlineUsers[username].Count == 0)
                 {
                     OnlineUsers.Remove(username);
+                    isOffline = true;
                 }
             }
 
-            return Task.CompletedTask;
+            return Task.FromResult(isOffline);
         }
 
         public Task<string[]> GetOnlineUsers()
