@@ -14,8 +14,8 @@ namespace API.Helpers
                 return;
 
             var userId = resultContext.HttpContext.User.GetUserId();
-            var repo = resultContext.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
-            var user = await repo.GetByIdAsync(userId);
+            var unitOfWork = resultContext.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
+            var user = await unitOfWork.UserRepository.GetByIdAsync(userId);
 
             if (user == null)
             {
@@ -23,7 +23,7 @@ namespace API.Helpers
             }
 
             user.LastActive = DateTime.UtcNow;
-            await repo.SaveAllAsync();
+            await unitOfWork.Complete();
         }
     }
 }

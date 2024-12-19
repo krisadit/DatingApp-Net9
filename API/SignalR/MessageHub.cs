@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR
 {
-    public class MessageHub(IMessageRepository messageRepository, IUserRepository userRepository, IMapper mapper, IHubContext<PresenceHub> presenceHubContext) : Hub
+    public class MessageHub(IUnitOfWork unitOfWork, IMapper mapper, IHubContext<PresenceHub> presenceHubContext) : Hub
     {
         public override async Task OnConnectedAsync()
         {
@@ -26,7 +26,10 @@ namespace API.SignalR
 
             await Clients.Group(groupName).SendAsync("UpdatedGroup", group);
 
-            var messages = await messageRepository.GetMessageThread(Context.User.GetUsername(), otherUser!);
+            var messages = await unitOfWork.MessageRepository.GetMessageThread(Context.User.GetUsername(), otherUser!);
+
+            if (unitOfWork.HasChanges())
+                await unitOfWork.Complete();
 
             await Clients.Caller.SendAsync("ReceiveMessageThread", messages);
         }
@@ -47,8 +50,8 @@ namespace API.SignalR
                 throw new HubException("You cannot message yourself");
             }
 
-            var sender = await userRepository.GetByUsernameAsync(username);
-            var recipient = await userRepository.GetByUsernameAsync(createMessageDTO.RecipientUserName);
+            var sender = await unitOfWork.UserRepository.GetByUsernameAsync(username);
+            var recipient = await unitOfWork.UserRepository.GetByUsernameAsync(createMessageDTO.RecipientUserName);
 
             if (sender == null || recipient == null || sender.UserName == null || recipient.UserName == null)
             {
@@ -66,7 +69,7 @@ namespace API.SignalR
 
             var groupName = getGroupName(sender.UserName, recipient.UserName);
 
-            var group = await messageRepository.GetMessageGroup(groupName);
+            var group = await unitOfWork.MessageRepository.GetMessageGroup(groupName);
 
             if (group != null && group.Connections.Any(x => x.Username == recipient.UserName))
             {
@@ -86,9 +89,9 @@ namespace API.SignalR
             }
 
 
-            messageRepository.AddMessage(message);
+            unitOfWork.MessageRepository.AddMessage(message);
 
-            if (await messageRepository.SaveAllAsync())
+            if (await unitOfWork.Complete())
             {
                 await Clients.Group(groupName).SendAsync("NewMessage", (mapper.Map<MessageDTO>(message)));
             }
@@ -98,18 +101,18 @@ namespace API.SignalR
         {
             var username = Context.User?.GetUsername() ?? throw new Exception("Could not get user");
 
-            Group? group = await messageRepository.GetMessageGroup(groupName);
+            Group? group = await unitOfWork.MessageRepository.GetMessageGroup(groupName);
             Connection connection = new() { ConnectionId = Context.ConnectionId, Username = username };
 
             if (group == null)
             {
                 group = new() { Name = groupName };
-                messageRepository.AddGroup(group);
+                unitOfWork.MessageRepository.AddGroup(group);
             }
 
             group.Connections.Add(connection);
 
-            if(await messageRepository.SaveAllAsync())
+            if(await unitOfWork.Complete())
             {
                 return group;
             }
@@ -119,13 +122,13 @@ namespace API.SignalR
 
         private async Task<Group> RemoveFromMessageGroup()
         {
-            var group = await messageRepository.GetGroupForConnection(Context.ConnectionId);
+            var group = await unitOfWork.MessageRepository.GetGroupForConnection(Context.ConnectionId);
             var connection = group?.Connections.FirstOrDefault(x => x.ConnectionId == Context.ConnectionId);
 
             if (connection != null && group != null)
             {
-                messageRepository.RemoveConnection(connection);
-                if (await messageRepository.SaveAllAsync())
+                unitOfWork.MessageRepository.RemoveConnection(connection);
+                if (await unitOfWork.Complete())
                 {
                     return group;
                 }
