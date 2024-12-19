@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { EventEmitter, inject, Injectable, signal } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { environment } from '../../environments/environment';
+import { Group } from '../_models/group';
 import { Message } from '../_models/message';
 import { PaginatedResult } from '../_models/pagination';
 import { StoredUser } from '../_models/stored-user';
 import { setPaginatedResponse, setPaginationHeaders } from './pagination-helper';
-import { Group } from '../_models/group';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +18,7 @@ export class MessageService {
   hubConnection?: HubConnection;
   paginatedResults = signal<PaginatedResult<Message[]> | null>(null);
   messageThread = signal<Message[]>([]);
+  newMessageReceived: EventEmitter<boolean> = new EventEmitter();
 
   createHubConnection(user: StoredUser, otherUsername: string) {
     this.hubConnection = new HubConnectionBuilder()
@@ -31,10 +32,12 @@ export class MessageService {
 
     this.hubConnection.on('ReceiveMessageThread', messages => {
       this.messageThread.set(messages);
+      this.newMessageReceived.emit(true);
     });
 
     this.hubConnection.on('NewMessage', message => {
       this.messageThread.update(messages => [...messages, message])
+      this.newMessageReceived.emit(true);
     });
 
     this.hubConnection.on('UpdatedGroup', (group: Group) => {
@@ -45,7 +48,7 @@ export class MessageService {
               message.dateRead = new Date(Date.now());
             }
           })
-
+          this.newMessageReceived.emit(true);
           return messages;
         })
       }
