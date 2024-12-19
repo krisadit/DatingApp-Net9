@@ -43,6 +43,7 @@ namespace API.Data
             foreach (var user in users)
             {
                 user.UserName = user.UserName!.ToLower();
+                user.Photos.First().IsApproved = true;
                 await userManager.CreateAsync(user, "Pa$$w0rd"); // Probably needs to be randomized everytime?
                 await userManager.AddToRoleAsync(user, "Member");
             }

@@ -1,9 +1,13 @@
 <div class="row">
   @for (photo of member().photos; track photo.id) {
   <div class="col-2">
-    <img src="{{ photo.url }}" alt="Photo uploaded by user" onerror="this.src='user.png'" class="img-thumbnail mb-1" />
+    <div class="card-img-wrapper" [class.pending]="!photo.isApproved">
+      <img src="{{ photo.url }}" alt="Photo uploaded by user" onerror="this.src='user.png'"
+        class="img-thumbnail mb-1" />
+      <i class="fa fa-hourglass-half" alt="Pending approval"></i>
+    </div>
     <div class="text-center">
-      <button class="btn btn-sm me-1" [disabled]="photo.isMain" (click)="setMainPhoto(photo)"
+      <button class="btn btn-sm me-1" [disabled]="photo.isMain || !photo.isApproved" (click)="setMainPhoto(photo)"
         [ngClass]="photo.isMain? 'btn-success active' : 'btn-outline-success'"><i class="fa fa-star"></i></button>
       <button class="btn btn-sm btn-danger" [disabled]="photo.isMain" (click)="deletePhoto(photo)"><i
           class="fa fa-trash"></i></button>

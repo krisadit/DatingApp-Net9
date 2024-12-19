@@ -1,1 +1,48 @@
-<p>photo-management works!</p>
+<div class="d-flex justify-content-center row">
+  <div class="text-center mt-3">
+    <h2>
+      {{photos.length + ' remaining'}}
+    </h2>
+  </div>
+  <!-- <div class="container">
+    <div class="row mx-4 my-3">
+      <form class="col-6" #form="ngForm" (ngSubmit)="getPhotosForApproval()">
+        <div class="row ">
+          <label class="col col-form-label col-form-label-sm" for="memberFilter">
+            <i class="fa fa-filter fa-lg me-2"></i>Filter members:</label>
+          <input class="col form-control form-control-sm mx-1" [(ngModel)]="selectedMembers" [typeahead]="members"
+            name="selectedMembers" [typeaheadMultipleSearch]="true" typeaheadMultipleSearchDelimiters="," />
+          <button class="btn btn-primary btn-sm ms-1 col-1" type="submit">
+            <i class="fa fa-check"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div> -->
+  <div class="row">
+    @for (photo of photos; track photo.id) {
+    <div class="col-2">
+      <div class="card mb-4">
+        <div class="clickable-img" (click)="viewPhoto(photo)">
+          <div class="card-img-wrapper">
+            <img src="{{photo.url || 'user.png'}}" alt="{{photo.username}}'s image" class="card-img-top" />
+            <i class="fa fa-eye fa-3x"></i>
+          </div>
+        </div>
+        <div class="card-body p-1">
+          <h6 class="card-title text-center mb-1">
+            {{photo.username}}
+          </h6>
+          <p class="card-text text-muted text-center">
+            <button type="button" class="btn btn-success btn-sm mx-1" (click)="approvePhoto(photo.id)"><i
+                class="fa fa-check" alt="Approve"></i></button>
+            <button type="button" class="btn btn-danger btn-sm mx-1" (click)="rejectPhoto(photo.id)"><i
+                class="fa fa-ban" alt="Deny"></i></button>
+          </p>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+
+</div>

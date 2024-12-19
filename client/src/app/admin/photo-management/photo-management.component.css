@@ -1,0 +1,43 @@
+.clickable-img:hover img {
+  transform: scale(1.2, 1.2);
+  filter: grayscale(1);
+  mix-blend-mode: multiply;
+  transition-duration: 500ms;
+  transition-timing-function: ease-out;
+}
+
+.clickable-img img {
+  transform: scale(1.0, 1.0);
+  filter: grayscale(0);
+  mix-blend-mode: multiply;
+  transition-duration: 500ms;
+  transition-timing-function: ease-out;
+  position: relative;
+}
+
+.clickable-img i {
+  position: absolute;
+  top: 35%;
+  left: 35%;
+  opacity: 0;
+  transition-duration: 500ms;
+  transition-timing-function: ease-out;
+  color: var(--bs-white);
+  text-shadow: 0 0 5px var(--bs-gray-900)
+}
+
+.clickable-img:hover i {
+  opacity: 1;
+  transition-duration: 500ms;
+  transition-timing-function: ease-out;
+}
+
+
+.card-img-wrapper {
+  overflow: hidden;
+  position: relative;
+}
+
+.clickable-img {
+  cursor: pointer;
+}

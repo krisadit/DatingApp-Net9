@@ -3,3 +3,23 @@
   color: var(--bs-info);
   transition: all 0.3s ease-in-out;
 }
+
+.card-img-wrapper {
+  position: relative;
+}
+.card-img-wrapper i {
+  display: none;
+}
+
+.card-img-wrapper.pending img {
+  opacity: 0.3;
+}
+
+.card-img-wrapper.pending i {
+  position: absolute;
+  display: block;
+  top: 42.5%;
+  left: 42.5%;
+  color: var(--bs-white);
+  text-shadow: 0 0 5px var(--bs-gray-900)
+}

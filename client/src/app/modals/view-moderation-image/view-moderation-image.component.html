@@ -1,0 +1,18 @@
+<div class="modal-header">
+  <h4 class="modal-title pull-left">
+    {{getTitle()}}
+  </h4>
+</div>
+<div class="modal-body text-center">
+  <img [src]="photo!.url" onerror="this.src='user.png'" (error)="invalidPhoto()" />
+</div>
+<div class="modal-body text-center">
+  @if (!invalidTextShow) {
+  <button type="button" class="btn btn-success btn-sm mx-1" (click)="approvePhoto()"><i class="fa fa-check"
+      alt="Approve"></i></button>
+  <button type="button" class="btn btn-danger btn-sm mx-1" (click)="rejectPhoto()"><i class="fa fa-ban"
+      alt="Deny"></i></button>
+  } @else {
+  <p>Invalid image!</p>
+  }
+</div>
