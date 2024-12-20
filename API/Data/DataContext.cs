@@ -48,7 +48,7 @@ namespace API.Data
                 .HasOne(s => s.TargetUser)
                 .WithMany(l => l.LikedBy)
                 .HasForeignKey(s => s.TargetUserId)
-                .OnDelete(DeleteBehavior.Cascade); // SQL server needs this to be NoAction
+                .OnDelete(DeleteBehavior.NoAction); // SQL server needs this to be NoAction, because it doesn't like both sides of a self-referencing many-to-many relationship to have Cascade. SQLite can handle this.
 
             builder.Entity<Message>()
                 .HasOne(x => x.Recipient)
