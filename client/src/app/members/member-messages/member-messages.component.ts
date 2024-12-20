@@ -16,12 +16,14 @@ export class MemberMessagesComponent implements OnInit, OnDestroy, AfterViewChec
   username = input.required<string>();
   messageContent = "";
   scrollOnce = false;
+  loading = false;
 
   sendMessage() {
+    this.loading = true;
     this.messageService.sendMessage(this.username(), this.messageContent)?.then(() => {
       this.messageForm?.reset();
       this.scrollOnce = false;
-    });
+    }).finally(() => this.loading = false);
   }
 
   ngOnInit(): void {

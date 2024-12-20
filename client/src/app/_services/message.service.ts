@@ -7,6 +7,7 @@ import { Message } from '../_models/message';
 import { PaginatedResult } from '../_models/pagination';
 import { StoredUser } from '../_models/stored-user';
 import { setPaginatedResponse, setPaginationHeaders } from './pagination-helper';
+import { BusyService } from './busy.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,12 +16,14 @@ export class MessageService {
   private baseUrl = environment.apiUrl;
   private hubsUrl = environment.hubsUrl;
   private http = inject(HttpClient);
+  private busyService = inject(BusyService);
   hubConnection?: HubConnection;
   paginatedResults = signal<PaginatedResult<Message[]> | null>(null);
   messageThread = signal<Message[]>([]);
   newMessageReceived: EventEmitter<boolean> = new EventEmitter();
 
   createHubConnection(user: StoredUser, otherUsername: string) {
+    this.busyService.busy();
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(`${this.hubsUrl}message?user=${otherUsername}`, {
         accessTokenFactory: () => user.token
@@ -28,7 +31,9 @@ export class MessageService {
       .withAutomaticReconnect()
       .build();
 
-    this.hubConnection.start().catch(error => console.log(error));
+    this.hubConnection.start()
+      .catch(error => console.log(error))
+      .finally(() => this.busyService.idle());
 
     this.hubConnection.on('ReceiveMessageThread', messages => {
       this.messageThread.set(messages);

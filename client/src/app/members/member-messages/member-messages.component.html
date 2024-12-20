@@ -39,8 +39,12 @@
         <input type="text" name="messageContent" required [(ngModel)]="messageContent" class="form-control input-sm"
           placeholder="Send a private message" />
         <div class="input-group-append">
-          <button class="btn btn-primary" type="submit" [disabled]="!messageForm.valid">
+          <button class="btn btn-primary" type="submit" [disabled]="!messageForm.valid || loading">
+            @if (loading) {
+            <i class="fa fa-spinner" alt="Send message"></i>
+            } @else {
             <i class="fa fa-solid fa-paper-plane" alt="Send message"></i>
+            }
           </button>
         </div>
       </div>
