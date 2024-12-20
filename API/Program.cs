@@ -1,3 +1,4 @@
+using API.Controllers;
 using API.Data;
 using API.Entities;
 using API.Errors;
@@ -37,6 +38,7 @@ namespace DatingApp
             app.MapControllers();
             app.MapHub<PresenceHub>("hubs/presence");
             app.MapHub<MessageHub>("hubs/message");
+            app.MapFallbackToController("Index", "Fallback");
 
             // We need to access a service locator to get ahold of a service outside of
             // dependency injection so that it can be disposed of immediately.
